@@ -1,0 +1,66 @@
+---
+title: "Les remue-méninges du RIS"
+subtitle: "Qui est le plus mignon ?"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", warning=FALSE)
+```
+
+On s’intéresse au jeu de données jouet créé spécialement pour l’occasion : 
+
+```{r}
+d = data.frame(
+  species = rep(c("cat", "dog"), each=6),
+  race    = rep(c("siam", "ango", "york", "pitb"), each=3) 
+)
+set.seed(1)
+d$cutescore  = rnorm(nrow(d))
+d
+```
+
+On cherche à expliquer le *cutescore* par les cofacteurs *species* et *race*.
+
+Si l’on considère le modèle suivant : 
+
+$$cutescore \sim species + race$$
+
+On remarque que le plan d’experience n’est pas complet : 
+
+```{r}
+table(d$species, d$race)
+```
+
+En effet, la race spécialise les individus d’une espèce donnée : il n‘existe a priori pas de chat de race pitbull ou chien de race siamois.
+Le plan complet n’a pas de réalité biologique.
+
+
+On ne peut pas réaliser une *two-way ANOVA*. Néanmoins, le facteur *race* va potentiellement expliquer une partie de variabilité du *cutescore*.
+
+D’ailleurs, si l’on écrit les deux modèles linéaires suivants :
+
+```{r}
+m = lm(cutescore~species, d)
+anova(m)
+
+m = lm(cutescore~species+race, d)
+anova(m)
+```
+
+la statistique de test F associée au facteur *species* n’est pas la même pour les deux tableaux de décomposition de la variance.
+
+**Le second tableau de décomposition de la variance est-il faux ?**
+
+**Comment écrire correctement un modèle linéaire qui intègrerait l’effet de la race ?** 
+
+**Quel est le rapport entre mon exemple, les modèles mixtes, les effets fixes et aléatoires ?**
+
