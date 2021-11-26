@@ -54,6 +54,10 @@ anova(m)
 
 m = lm(cutescore~species+race, d)
 anova(m)
+summary(m)
+
+m = lm(cutescore~race+species, d)
+anova(m)
 ```
 
 la statistique de test F associée au facteur *species* n’est pas la même pour les deux tableaux de décomposition de la variance.
@@ -63,4 +67,40 @@ la statistique de test F associée au facteur *species* n’est pas la même pou
 **Comment écrire correctement un modèle linéaire qui intègrerait l’effet de la race ?** 
 
 **Quel est le rapport entre mon exemple, les modèles mixtes, les effets fixes et aléatoires ?**
+
+
+
+# Pistes
+
+Cécile : *Sinon, j’étais partie pour traduire ton problème en termes de between et within factors pour une ANOVA. Le within factor est spécialement utilisé pour des données appariées. Et je me disais qu’en codant les données différemment (ex : codage race sur 4 variables: un chat siamois serait codé 1 / 0 / 0 / 0 pour les variables siam / ango /york /pitb) ça pourrait être une piste.*
+
+```{r}
+m = lm(cutescore~species+race, d)
+summary(m)
+anova(m)
+
+d$species_race = paste0(d$species, "_", d$race)
+m = lm(cutescore~species_race, d)
+summary(m)
+anova(m)
+
+d  = cbind(d, 
+  cat_siam=c(1,1,1,0,0,0,0,0,0,0,0,0),
+  cat_ango=c(0,0,0,1,1,1,0,0,0,0,0,0),
+  dog_pitb=c(0,0,0,0,0,0,1,1,1,0,0,0),
+  cat_siam=c(0,0,0,0,0,0,0,0,0,1,1,1)
+)
+m = lm(cutescore~cat_siam+cat_ango+dog_pitb+cat_siam, d)
+summary(m)
+anova(m)
+```
+
+Cécile : *Mais en grattant, je me demande si ton cas ne pourrait pas être résolu par une nested ANOVA ou modèle mixte la variable race étant nichée dans la variable espèce. https://rcompanion.org/rcompanion/d_07.html*
+
+```{r}
+m = aov(cutescore~race+Error(species), d)
+summary(m)
+```
+
+
 
